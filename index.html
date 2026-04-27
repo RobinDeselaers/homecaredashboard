@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MyGentiva — Clinician Inbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --gentiva-green: #0F4C3A;
+    --gentiva-green-deep: #093528;
+    --gentiva-teal: #1D9E75;
+    --gentiva-teal-soft: #E8F4EE;
+    --gentiva-amber: #F2A65A;
+    --gentiva-amber-soft: #FCE8D4;
+    --gentiva-blue: #B8D9E8;
+    --gentiva-blue-soft: #E5F0F5;
+    --gentiva-coral: #E8B0A0;
+    --bg: #F4F2EF;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F7F5F2;
+    --border: rgba(15, 76, 58, 0.08);
+    --border-strong: rgba(15, 76, 58, 0.16);
+    --text-primary: #0F4C3A;
+    --text-secondary: #4A6358;
+    --text-muted: #7A8B83;
+    --shadow-sm: 0 1px 2px rgba(15, 76, 58, 0.04);
+    --shadow-md: 0 2px 8px rgba(15, 76, 58, 0.06);
+    --shadow-lg: 0 8px 24px rgba(15, 76, 58, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: #E8E4DD;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* Phone frame for desktop preview */
+  .phone-frame {
+    width: 100%;
+    max-width: 420px;
+    height: 100vh;
+    max-height: 900px;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (min-width: 500px) {
+    .phone-frame {
+      border-radius: 32px;
+      margin: 20px;
+      max-height: calc(100vh - 40px);
+    }
+  }
+
+  /* Top header bar */
+  .top-bar {
+    background: #FFFFFF;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+
+  .top-bar-left {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .top-bar-left:hover { background: var(--bg-soft); }
+
+  .top-bar-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+  }
+
+  .top-bar-right {
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Scrollable main area */
+  .main-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+
+  .main-content::-webkit-scrollbar { width: 0; }
+
+  /* Screen system */
+  .screen {
+    display: none;
+    animation: slideIn 0.25s ease-out;
+  }
+  .screen.active { display: block; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* HOME SCREEN */
+  .hero {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0F4C3A 0%, #1D9E75 100%);
+  }
+
+  .hero-image {
+    position: absolute;
+    inset: 0;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%231D9E75"/><stop offset="1" stop-color="%230F4C3A"/></linearGradient><pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="%23FFFFFF" opacity="0.1"/></pattern></defs><rect width="400" height="200" fill="url(%23g1)"/><rect width="400" height="200" fill="url(%23dots)"/><circle cx="320" cy="60" r="80" fill="%23FFFFFF" opacity="0.08"/><circle cx="80" cy="180" r="120" fill="%23FFFFFF" opacity="0.06"/></svg>');
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 76, 58, 0.1) 0%, rgba(15, 76, 58, 0.4) 100%);
+  }
+
+  .hero-logo {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #FFFFFF;
+  }
+
+  .hero-logo-mark {
+    width: 28px;
+    height: 28px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+  }
+
+  .hero-logo-text {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .greeting-card {
+    background: var(--bg);
+    margin-top: -40px;
+    padding: 24px 22px 8px;
+    position: relative;
+    z-index: 2;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .greeting {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gentiva-green);
+    line-height: 1.15;
+    letter-spacing: -0.6px;
+  }
+
+  .greeting-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 18px 0 4px;
+  }
+
+  .stat-pill {
+    background: var(--bg-card);
+    border-radius: 14px;
+    padding: 12px 10px;
+    text-align: center;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .stat-pill:active { transform: scale(0.97); }
+  .stat-pill:hover { box-shadow: var(--shadow-md); }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gentiva-green);
+    letter-spacing: -0.4px;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  /* Inbox cards */
+  .inbox-cards {
+    padding: 20px 18px 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .card-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--gentiva-teal-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gentiva-green);
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gentiva-green);
+    letter-spacing: -0.3px;
+  }
+
+  .chevron-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gentiva-green);
+    transition: background 0.15s;
+    border: none;
+    background: transparent;
+  }
+  .chevron-btn:hover { background: var(--gentiva-teal-soft); }
+  .chevron-btn:active { transform: scale(0.92); }
+
+  .card-summary {
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .summary-line {
+    font-size: 13px;
+    color: var(--gentiva-teal);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .summary-line .count {
+    font-weight: 700;
+  }
+
+  /* Activity / Message rows */
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.15s;
+    margin: 0 -8px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .row:hover { background: var(--bg-soft); }
+  .row:active { background: var(--gentiva-teal-soft); }
+
+  .row-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .row-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .message-row {
+    align-items: flex-start;
+  }
+  .message-row .row-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .message-subject {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .message-preview {
+    font-size: 13px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 220px;
+  }
+
+  .report-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    cursor: pointer;
+    color: var(--gentiva-teal);
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background 0.15s;
+    margin: 0 -8px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .report-link:hover { background: var(--gentiva-teal-soft); }
+  .report-link + .report-link {
+    border-top: 1px solid var(--border);
+  }
+
+  /* DETAIL SCREENS */
+  .detail-header {
+    background: linear-gradient(135deg, var(--gentiva-green) 0%, var(--gentiva-teal) 100%);
+    padding: 24px 22px 28px;
+    color: #FFFFFF;
+  }
+
+  .detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: rgba(255,255,255,0.9);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 18px;
+    background: none;
+    border: none;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .detail-back:hover { background: rgba(255,255,255,0.1); }
+
+  .detail-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    margin-bottom: 4px;
+  }
+  .detail-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+    font-weight: 500;
+  }
+
+  .detail-body {
+    padding: 18px;
+    padding-bottom: 100px;
+  }
+
+  /* List screens (full activities, full messages) */
+  .list-section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 18px 4px 8px;
+  }
+  .list-section-label:first-child { margin-top: 0; }
+
+  .list-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .list-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .list-card:active { transform: translateY(0); }
+
+  .list-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .list-time-bubble {
+    background: var(--gentiva-teal-soft);
+    color: var(--gentiva-green);
+    padding: 8px 10px;
+    border-radius: 10px;
+    text-align: center;
+    min-width: 62px;
+    flex-shrink: 0;
+  }
+  .list-time-bubble.amber { background: var(--gentiva-amber-soft); color: #8B5A1E; }
+  .list-time-bubble.blue { background: var(--gentiva-blue-soft); color: #2C6B8C; }
+  .list-time-bubble .bubble-time {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+  .list-time-bubble .bubble-period {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    opacity: 0.8;
+  }
+
+  .list-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .list-info-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .list-info-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .visit-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-right: 6px;
+  }
+  .tag-sn { background: var(--gentiva-teal-soft); color: var(--gentiva-green); }
+  .tag-pt { background: var(--gentiva-amber-soft); color: #8B5A1E; }
+  .tag-ot { background: var(--gentiva-blue-soft); color: #2C6B8C; }
+  .tag-soc { background: #FCE4E0; color: #A04030; }
+  .tag-recert { background: #F0E4FA; color: #5B3A8C; }
+
+  /* Activity detail */
+  .info-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .info-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gentiva-green);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .label {
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .info-row .value {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .action-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 12px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--gentiva-green);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .action-btn:hover { background: var(--gentiva-teal-soft); border-color: var(--gentiva-teal); }
+  .action-btn:active { transform: scale(0.97); }
+  .action-btn svg { color: var(--gentiva-teal); }
+
+  .primary-btn {
+    width: 100%;
+    background: var(--gentiva-green);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background 0.15s, transform 0.15s;
+    font-family: inherit;
+  }
+  .primary-btn:hover { background: var(--gentiva-green-deep); }
+  .primary-btn:active { transform: scale(0.98); }
+
+  /* Message detail */
+  .message-thread {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .message-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gentiva-teal-soft);
+    color: var(--gentiva-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .message-from {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .message-from-role {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .message-time-detail {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .message-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .message-body p { margin-bottom: 10px; }
+  .message-body p:last-child { margin-bottom: 0; }
+
+  /* Report screen */
+  .report-section {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .report-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .report-stat {
+    background: var(--bg-soft);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .report-stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+  }
+  .report-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gentiva-green);
+    letter-spacing: -0.4px;
+  }
+  .report-stat-trend {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .trend-up { color: var(--gentiva-teal); }
+  .trend-down { color: #C44545; }
+
+  .chart-container {
+    position: relative;
+    height: 200px;
+    margin: 8px 0;
+  }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-chip {
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .filter-chip:hover { border-color: var(--gentiva-teal); }
+  .filter-chip.active {
+    background: var(--gentiva-green);
+    color: #FFFFFF;
+    border-color: var(--gentiva-green);
+  }
+
+  /* Bottom AI bar */
+  .ai-bar {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 78px;
+    background: #FFFFFF;
+    border: 1.5px solid #C9B8E8;
+    border-radius: 28px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-md);
+    z-index: 20;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .ai-bar:hover { transform: translateY(-1px); }
+
+  .ai-icon {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+  .ai-text {
+    flex: 1;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .ai-mic {
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  /* Bottom navigation */
+  .bottom-nav {
+    background: var(--gentiva-green);
+    padding: 12px 8px 14px;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    flex-shrink: 0;
+    z-index: 5;
+    position: relative;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: rgba(255,255,255,0.85);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.15s;
+    background: none;
+    border: none;
+    flex: 1;
+  }
+  .nav-item:hover { color: #FFFFFF; }
+  .nav-item.active { color: #FFFFFF; }
+  .nav-item.active .nav-label { font-weight: 700; }
+
+  .nav-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Toast */
+  .toast {
+    position: absolute;
+    bottom: 160px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--gentiva-green-deep);
+    color: #FFFFFF;
+    padding: 12px 20px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 50;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-bar-left" onclick="showToast('Compose new')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"></path>
+        <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+      </svg>
+    </div>
+    <div class="top-bar-title" id="topBarTitle">MyGentiva</div>
+    <div class="top-bar-right"></div>
+  </div>
+
+  <!-- MAIN CONTENT (scrollable) -->
+  <div class="main-content" id="mainContent">
+
+    <!-- HOME SCREEN -->
+    <div class="screen active" id="screen-home">
+      <div class="hero">
+        <div class="hero-image"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-logo">
+          <div class="hero-logo-mark">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </div>
+          <span class="hero-logo-text">gentiva</span>
+        </div>
+      </div>
+
+      <div class="greeting-card">
+        <div class="greeting">How are you today,<br>Megan?</div>
+        <div class="greeting-sub">Tuesday, April 28 · 4 visits scheduled</div>
+
+        <div class="quick-stats">
+          <div class="stat-pill" onclick="showScreen('activities')">
+            <div class="stat-value">2</div>
+            <div class="stat-label">Today</div>
+          </div>
+          <div class="stat-pill" onclick="showScreen('messages')">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Unread</div>
+          </div>
+          <div class="stat-pill" onclick="showScreen('report')">
+            <div class="stat-value">94%</div>
+            <div class="stat-label">On time</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="inbox-cards">
+
+        <!-- Activities Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+              </div>
+              <div class="card-title">Activities</div>
+            </div>
+            <button class="chevron-btn" onclick="showScreen('activities')" aria-label="See all activities">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div class="card-summary">
+            <div class="summary-line"><span class="count">2</span> activities scheduled today</div>
+            <div class="row" onclick="showActivity('act-1')">
+              <div class="row-name">Adams, W M.</div>
+              <div class="row-meta">12:30 PM</div>
+            </div>
+            <div class="row" onclick="showActivity('act-2')">
+              <div class="row-name">A1693, AALIYAH</div>
+              <div class="row-meta">3:30 PM</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <path d="m22 7-10 5L2 7"/>
+                </svg>
+              </div>
+              <div class="card-title">Messages</div>
+            </div>
+            <button class="chevron-btn" onclick="showScreen('messages')" aria-label="See all messages">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div class="card-summary">
+            <div class="summary-line"><span class="count">3</span> new messages</div>
+            <div class="row message-row" onclick="showMessage('msg-1')">
+              <div class="row-content">
+                <div class="message-subject">Staff Meeting on Friday</div>
+                <div class="message-preview">Hello Everyone! Just a reminder that…</div>
+              </div>
+              <div class="row-meta">8:29 AM</div>
+            </div>
+            <div class="row message-row" onclick="showMessage('msg-2')">
+              <div class="row-content">
+                <div class="message-subject">OASIS-E Update Required</div>
+                <div class="message-preview">Two assessments need correction…</div>
+              </div>
+              <div class="row-meta">7:14 AM</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reports Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <line x1="2" y1="9" x2="22" y2="9"/>
+                  <line x1="6" y1="13" x2="14" y2="13"/>
+                  <line x1="6" y1="16" x2="12" y2="16"/>
+                </svg>
+              </div>
+              <div class="card-title">Reports</div>
+            </div>
+          </div>
+          <div class="card-summary">
+            <div class="report-link" onclick="showScreen('report')">
+              <span>Activity Summary Report</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </div>
+            <div class="report-link" onclick="showToast('Visit Compliance Report')">
+              <span>Visit Compliance</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </div>
+            <div class="report-link" onclick="showToast('Documentation Status')">
+              <span>Documentation Status</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACTIVITIES SCREEN -->
+    <div class="screen" id="screen-activities">
+      <div class="detail-header">
+        <button class="detail-back" onclick="showScreen('home')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Inbox
+        </button>
+        <div class="detail-title">Activities</div>
+        <div class="detail-subtitle">4 visits scheduled · 2 today</div>
+      </div>
+
+      <div class="detail-body">
+        <div class="filter-bar">
+          <div class="filter-chip active">All</div>
+          <div class="filter-chip">Today</div>
+          <div class="filter-chip">Tomorrow</div>
+          <div class="filter-chip">This Week</div>
+          <div class="filter-chip">SN</div>
+          <div class="filter-chip">PT</div>
+        </div>
+
+        <div class="list-section-label">Today · Tuesday, April 28</div>
+
+        <div class="list-card" onclick="showActivity('act-1')">
+          <div class="list-row">
+            <div class="list-time-bubble">
+              <div class="bubble-time">12:30</div>
+              <div class="bubble-period">PM</div>
+            </div>
+            <div class="list-info">
+              <div class="list-info-name">Adams, W M.</div>
+              <div class="list-info-meta">
+                <span class="visit-tag tag-sn">SN</span>
+                Routine · 60 min
+              </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A8B83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="list-card" onclick="showActivity('act-2')">
+          <div class="list-row">
+            <div class="list-time-bubble amber">
+              <div class="bubble-time">3:30</div>
+              <div class="bubble-period">PM</div>
+            </div>
+            <div class="list-info">
+              <div class="list-info-name">A1693, Aaliyah</div>
+              <div class="list-info-meta">
+                <span class="visit-tag tag-pt">PT</span>
+                Eval · 45 min
+              </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A8B83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="list-section-label">Tomorrow · Wednesday, April 29</div>
+
+        <div class="list-card" onclick="showActivity('act-3')">
+          <div class="list-row">
+            <div class="list-time-bubble">
+              <div class="bubble-time">9:00</div>
+              <div class="bubble-period">AM</div>
+            </div>
+            <div class="list-info">
+              <div class="list-info-name">Brown, M K.</div>
+              <div class="list-info-meta">
+                <span class="visit-tag tag-soc">SOC</span>
+                Start of Care · 90 min
+              </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A8B83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <div class="list-card" onclick="showActivity('act-4')">
+          <div class="list-row">
+            <div class="list-time-bubble blue">
+              <div class="bubble-time">2:00</div>
+              <div class="bubble-period">PM</div>
+            </div>
+            <div class="list-info">
+              <div class="list-info-name">Davis, R T.</div>
+              <div class="list-info-meta">
+                <span class="visit-tag tag-recert">Recert</span>
+                OASIS-E · 75 min
+              </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A8B83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY DETAIL SCREEN -->
+    <div class="screen" id="screen-activity">
+      <div class="detail-header">
+        <button class="detail-back" onclick="showScreen('activities')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Activities
+        </button>
+        <div class="detail-title" id="activityName">Adams, William M.</div>
+        <div class="detail-subtitle" id="activitySubtitle">Skilled Nursing · Routine Visit</div>
+      </div>
+
+      <div class="detail-body">
+        <div class="info-card">
+          <div class="info-card-title">Visit Details</div>
+          <div class="info-row">
+            <span class="label">Date</span>
+            <span class="value" id="visitDate">Tue, Apr 28, 2026</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Time</span>
+            <span class="value" id="visitTime">12:30 PM</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Duration</span>
+            <span class="value" id="visitDuration">60 minutes</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Visit Type</span>
+            <span class="value" id="visitType">SN Routine</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Episode Day</span>
+            <span class="value" id="visitEpisode">14 of 60</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-title">Patient Info</div>
+          <div class="info-row">
+            <span class="label">MRN</span>
+            <span class="value">HC-204781</span>
+          </div>
+          <div class="info-row">
+            <span class="label">DOB</span>
+            <span class="value">Mar 14, 1947 (79)</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Primary Dx</span>
+            <span class="value">CHF (I50.9)</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Address</span>
+            <span class="value">1247 Oakwood Dr</span>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <button class="action-btn" onclick="showToast('Opening directions')">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            Directions
+          </button>
+          <button class="action-btn" onclick="showToast('Calling patient')">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            Call Patient
+          </button>
+          <button class="action-btn" onclick="showToast('Opening chart')">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            Open Chart
+          </button>
+          <button class="action-btn" onclick="showToast('Care plan loaded')">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 11 12 14 22 4"></polyline>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            Care Plan
+          </button>
+        </div>
+
+        <button class="primary-btn" onclick="showToast('Visit started')">Start Visit</button>
+      </div>
+    </div>
+
+    <!-- MESSAGES SCREEN -->
+    <div class="screen" id="screen-messages">
+      <div class="detail-header">
+        <button class="detail-back" onclick="showScreen('home')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Inbox
+        </button>
+        <div class="detail-title">Messages</div>
+        <div class="detail-subtitle">3 unread · 12 total</div>
+      </div>
+
+      <div class="detail-body">
+        <div class="filter-bar">
+          <div class="filter-chip active">All</div>
+          <div class="filter-chip">Unread</div>
+          <div class="filter-chip">Team</div>
+          <div class="filter-chip">Clinical</div>
+          <div class="filter-chip">Admin</div>
+        </div>
+
+        <div class="list-section-label">Today</div>
+
+        <div class="list-card" onclick="showMessage('msg-1')">
+          <div class="list-row">
+            <div class="avatar">JS</div>
+            <div class="list-info">
+              <div class="list-info-name">Staff Meeting on Friday</div>
+              <div class="list-info-meta">Jordan Smith · 8:29 AM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="list-card" onclick="showMessage('msg-2')">
+          <div class="list-row">
+            <div class="avatar" style="background: var(--gentiva-amber-soft); color: #8B5A1E;">RC</div>
+            <div class="list-info">
+              <div class="list-info-name">OASIS-E Update Required</div>
+              <div class="list-info-meta">Rachel Chen, RN · 7:14 AM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="list-card" onclick="showMessage('msg-3')">
+          <div class="list-row">
+            <div class="avatar" style="background: var(--gentiva-blue-soft); color: #2C6B8C;">DW</div>
+            <div class="list-info">
+              <div class="list-info-name">New Referral — Davis, R.</div>
+              <div class="list-info-meta">Diane Walker · 6:48 AM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="list-section-label">Yesterday</div>
+
+        <div class="list-card" onclick="showToast('Message opened')">
+          <div class="list-row">
+            <div class="avatar">PT</div>
+            <div class="list-info">
+              <div class="list-info-name">PT Co-visit Schedule</div>
+              <div class="list-info-meta">Patricia Torres, PT · 4:15 PM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="list-card" onclick="showToast('Message opened')">
+          <div class="list-row">
+            <div class="avatar" style="background: #F0E4FA; color: #5B3A8C;">MS</div>
+            <div class="list-info">
+              <div class="list-info-name">Medication Reconciliation</div>
+              <div class="list-info-meta">Marcus Steel, RN · 2:30 PM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MESSAGE DETAIL SCREEN -->
+    <div class="screen" id="screen-message">
+      <div class="detail-header">
+        <button class="detail-back" onclick="showScreen('messages')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Messages
+        </button>
+        <div class="detail-title" id="messageSubject">Staff Meeting on Friday</div>
+        <div class="detail-subtitle" id="messageContext">Internal · Branch 4082</div>
+      </div>
+
+      <div class="detail-body">
+        <div class="message-thread">
+          <div class="message-meta">
+            <div class="avatar" id="msgAvatar">JS</div>
+            <div>
+              <div class="message-from" id="msgFrom">Jordan Smith</div>
+              <div class="message-from-role" id="msgRole">Branch Director</div>
+            </div>
+            <div class="message-time-detail" id="msgTime">Today, 8:29 AM</div>
+          </div>
+          <div class="message-body" id="msgBody">
+            <p>Hello Everyone!</p>
+            <p>Just a reminder that we'll be holding our weekly staff meeting this Friday at 8:00 AM in the main conference room. We'll be reviewing Q2 OASIS scores, discussing the new referral process from Mercy Hospital, and going over upcoming compliance training requirements.</p>
+            <p>Please come prepared with your visit verification numbers and any concerns about your current caseload. Coffee and pastries will be provided.</p>
+            <p>Looking forward to seeing all of you there!</p>
+            <p>— Jordan</p>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <button class="action-btn" onclick="showToast('Reply opened')">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 17 4 12 9 7"></polyline>
+              <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+            </svg>
+            Reply
+          </button>
+          <button class="action-btn" onclick="showToast('Marked complete')">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Acknowledge
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY SUMMARY REPORT SCREEN -->
+    <div class="screen" id="screen-report">
+      <div class="detail-header">
+        <button class="detail-back" onclick="showScreen('home')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Inbox
+        </button>
+        <div class="detail-title">Activity Summary</div>
+        <div class="detail-subtitle">April 1 – 28, 2026 · Megan R., RN</div>
+      </div>
+
+      <div class="detail-body">
+        <div class="filter-bar">
+          <div class="filter-chip">7 days</div>
+          <div class="filter-chip active">This month</div>
+          <div class="filter-chip">Quarter</div>
+          <div class="filter-chip">YTD</div>
+        </div>
+
+        <div class="report-section">
+          <div class="info-card-title" style="margin-bottom: 14px;">Performance</div>
+          <div class="report-stats">
+            <div class="report-stat">
+              <div class="report-stat-label">Visits Completed</div>
+              <div class="report-stat-value">87</div>
+              <div class="report-stat-trend trend-up">↑ 12% vs Mar</div>
+            </div>
+            <div class="report-stat">
+              <div class="report-stat-label">On-Time Rate</div>
+              <div class="report-stat-value">94%</div>
+              <div class="report-stat-trend trend-up">↑ 3% vs Mar</div>
+            </div>
+            <div class="report-stat">
+              <div class="report-stat-label">Avg Duration</div>
+              <div class="report-stat-value">52m</div>
+              <div class="report-stat-trend trend-down">↓ 4m vs Mar</div>
+            </div>
+            <div class="report-stat">
+              <div class="report-stat-label">Documentation</div>
+              <div class="report-stat-value">98%</div>
+              <div class="report-stat-trend trend-up">↑ 1% vs Mar</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <div class="info-card-title" style="margin-bottom: 8px;">Visits by Week</div>
+          <div class="chart-container">
+            <canvas id="weekChart"></canvas>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background: #1D9E75;"></div>Completed</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #F2A65A;"></div>Scheduled</div>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <div class="info-card-title" style="margin-bottom: 8px;">Visit Mix</div>
+          <div class="chart-container">
+            <canvas id="mixChart"></canvas>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <div class="info-card-title" style="margin-bottom: 12px;">Top Patients by Visit Count</div>
+          <div class="info-row">
+            <span class="label">Adams, W M.</span>
+            <span class="value">12 visits</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Brown, M K.</span>
+            <span class="value">9 visits</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Carter, J L.</span>
+            <span class="value">8 visits</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Davis, R T.</span>
+            <span class="value">6 visits</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Evans, P S.</span>
+            <span class="value">5 visits</span>
+          </div>
+        </div>
+
+        <button class="primary-btn" onclick="showToast('Report exported')">Export PDF</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AI BAR -->
+  <div class="ai-bar" onclick="showToast('Ask AI assistant')">
+    <svg class="ai-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="url(#aiGrad)"/>
+      <defs>
+        <linearGradient id="aiGrad" x1="4" y1="2" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#7C3AED"/>
+          <stop offset="1" stop-color="#1D9E75"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="ai-text">Ask AI anything...</div>
+    <svg class="ai-mic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+      <line x1="12" y1="19" x2="12" y2="23"></line>
+      <line x1="8" y1="23" x2="16" y2="23"></line>
+    </svg>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('home')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span class="nav-label">Home</span>
+    </button>
+    <button class="nav-item" onclick="showToast('My Journey')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <line x1="10" y1="14" x2="21" y2="3"></line>
+      </svg>
+      <span class="nav-label">My Journey</span>
+    </button>
+    <button class="nav-item active" onclick="showScreen('home')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+      </svg>
+      <span class="nav-label">MyGentiva</span>
+    </button>
+    <button class="nav-item" onclick="showToast('Launchpad')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      <span class="nav-label">Launchpad</span>
+    </button>
+    <button class="nav-item" onclick="showToast('Menu')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+      <span class="nav-label">Menu</span>
+    </button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+  // ---------------- DATA ----------------
+  const activities = {
+    'act-1': {
+      name: 'Adams, William M.',
+      subtitle: 'Skilled Nursing · Routine Visit',
+      date: 'Tue, Apr 28, 2026',
+      time: '12:30 PM',
+      duration: '60 minutes',
+      type: 'SN Routine',
+      episode: '14 of 60',
+      mrn: 'HC-204781',
+      dob: 'Mar 14, 1947 (79)',
+      dx: 'CHF (I50.9)',
+      address: '1247 Oakwood Dr'
+    },
+    'act-2': {
+      name: 'A1693, Aaliyah',
+      subtitle: 'Physical Therapy · Evaluation',
+      date: 'Tue, Apr 28, 2026',
+      time: '3:30 PM',
+      duration: '45 minutes',
+      type: 'PT Eval',
+      episode: '1 of 60',
+      mrn: 'HC-209554',
+      dob: 'Aug 02, 1955 (70)',
+      dx: 'Post-op THA (Z47.1)',
+      address: '892 Cedar Ln'
+    },
+    'act-3': {
+      name: 'Brown, Margaret K.',
+      subtitle: 'Skilled Nursing · Start of Care',
+      date: 'Wed, Apr 29, 2026',
+      time: '9:00 AM',
+      duration: '90 minutes',
+      type: 'SN SOC',
+      episode: '1 of 60',
+      mrn: 'HC-211302',
+      dob: 'Nov 22, 1942 (83)',
+      dx: 'COPD (J44.9)',
+      address: '4501 Riverside Ave'
+    },
+    'act-4': {
+      name: 'Davis, Robert T.',
+      subtitle: 'Skilled Nursing · Recertification',
+      date: 'Wed, Apr 29, 2026',
+      time: '2:00 PM',
+      duration: '75 minutes',
+      type: 'OASIS-E Recert',
+      episode: '60 of 60',
+      mrn: 'HC-198447',
+      dob: 'Jun 09, 1950 (75)',
+      dx: 'DM Type 2 (E11.9)',
+      address: '178 Maple Ct'
+    }
+  };
+
+  const messages = {
+    'msg-1': {
+      subject: 'Staff Meeting on Friday',
+      context: 'Internal · Branch 4082',
+      from: 'Jordan Smith',
+      role: 'Branch Director',
+      avatar: 'JS',
+      avatarStyle: '',
+      time: 'Today, 8:29 AM',
+      body: `<p>Hello Everyone!</p>
+        <p>Just a reminder that we'll be holding our weekly staff meeting this Friday at 8:00 AM in the main conference room. We'll be reviewing Q2 OASIS scores, discussing the new referral process from Mercy Hospital, and going over upcoming compliance training requirements.</p>
+        <p>Please come prepared with your visit verification numbers and any concerns about your current caseload. Coffee and pastries will be provided.</p>
+        <p>Looking forward to seeing all of you there!</p>
+        <p>— Jordan</p>`
+    },
+    'msg-2': {
+      subject: 'OASIS-E Update Required',
+      context: 'Clinical · Documentation',
+      from: 'Rachel Chen, RN',
+      role: 'Clinical Manager',
+      avatar: 'RC',
+      avatarStyle: 'background: var(--gentiva-amber-soft); color: #8B5A1E;',
+      time: 'Today, 7:14 AM',
+      body: `<p>Hi Megan,</p>
+        <p>I noticed two OASIS-E assessments from last week that need correction before submission:</p>
+        <p><strong>Adams, W M.</strong> — M1810 (Current Ability to Dress Upper Body) needs to be reviewed. Your selection conflicts with the functional notes you entered.</p>
+        <p><strong>Carter, J L.</strong> — M2020 (Management of Oral Medications) is marked as Response 0 but the medication list shows the patient requires set-up assistance.</p>
+        <p>Please update both by end of day Wednesday so we stay within the 7-day completion window.</p>
+        <p>Thanks!<br>Rachel</p>`
+    },
+    'msg-3': {
+      subject: 'New Referral — Davis, R.',
+      context: 'Clinical · Referral',
+      from: 'Diane Walker',
+      role: 'Intake Coordinator',
+      avatar: 'DW',
+      avatarStyle: 'background: var(--gentiva-blue-soft); color: #2C6B8C;',
+      time: 'Today, 6:48 AM',
+      body: `<p>Good morning Megan,</p>
+        <p>You've been assigned a new SOC for <strong>Robert Davis</strong>, referred from Mercy General following a CHF exacerbation discharge.</p>
+        <p>Patient is in your zone (Maple Ct) and admit date is requested for Wednesday. I've scheduled the visit for 2:00 PM but please confirm or reschedule based on your availability.</p>
+        <p>Referral packet, F2F documentation, and discharge summary are attached to the chart.</p>
+        <p>Diane</p>`
+    }
+  };
+
+  // ---------------- ROUTING ----------------
+  let charts = {};
+  const titleMap = {
+    'home': 'MyGentiva',
+    'activities': 'Activities',
+    'activity': 'Visit',
+    'messages': 'Messages',
+    'message': 'Message',
+    'report': 'Reports'
+  };
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const screen = document.getElementById('screen-' + id);
+    if (screen) screen.classList.add('active');
+    document.getElementById('topBarTitle').textContent = titleMap[id] || 'MyGentiva';
+    document.getElementById('mainContent').scrollTop = 0;
+
+    if (id === 'report') {
+      setTimeout(renderCharts, 60);
+    }
+  }
+
+  function showActivity(id) {
+    const a = activities[id];
+    if (!a) return;
+    document.getElementById('activityName').textContent = a.name;
+    document.getElementById('activitySubtitle').textContent = a.subtitle;
+    document.getElementById('visitDate').textContent = a.date;
+    document.getElementById('visitTime').textContent = a.time;
+    document.getElementById('visitDuration').textContent = a.duration;
+    document.getElementById('visitType').textContent = a.type;
+    document.getElementById('visitEpisode').textContent = a.episode;
+    // Patient info rows
+    const detail = document.getElementById('screen-activity');
+    const infoRows = detail.querySelectorAll('.info-card')[1].querySelectorAll('.info-row .value');
+    infoRows[0].textContent = a.mrn;
+    infoRows[1].textContent = a.dob;
+    infoRows[2].textContent = a.dx;
+    infoRows[3].textContent = a.address;
+    showScreen('activity');
+  }
+
+  function showMessage(id) {
+    const m = messages[id];
+    if (!m) return;
+    document.getElementById('messageSubject').textContent = m.subject;
+    document.getElementById('messageContext').textContent = m.context;
+    document.getElementById('msgAvatar').textContent = m.avatar;
+    document.getElementById('msgAvatar').style.cssText = m.avatarStyle;
+    document.getElementById('msgFrom').textContent = m.from;
+    document.getElementById('msgRole').textContent = m.role;
+    document.getElementById('msgTime').textContent = m.time;
+    document.getElementById('msgBody').innerHTML = m.body;
+    showScreen('message');
+  }
+
+  // ---------------- TOAST ----------------
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  // ---------------- CHARTS ----------------
+  function renderCharts() {
+    const weekCtx = document.getElementById('weekChart');
+    const mixCtx = document.getElementById('mixChart');
+    if (!weekCtx || !mixCtx) return;
+
+    if (charts.week) charts.week.destroy();
+    if (charts.mix) charts.mix.destroy();
+
+    Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+    Chart.defaults.color = '#4A6358';
+
+    charts.week = new Chart(weekCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4'],
+        datasets: [
+          {
+            label: 'Completed',
+            data: [22, 24, 21, 20],
+            backgroundColor: '#1D9E75',
+            borderRadius: 6,
+            barThickness: 18
+          },
+          {
+            label: 'Scheduled',
+            data: [2, 1, 3, 4],
+            backgroundColor: '#F2A65A',
+            borderRadius: 6,
+            barThickness: 18
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0F4C3A',
+            padding: 10,
+            titleFont: { size: 12, weight: 600 },
+            bodyFont: { size: 12 }
+          }
+        },
+        scales: {
+          x: {
+            stacked: true,
+            grid: { display: false },
+            ticks: { font: { size: 11, weight: 600 } }
+          },
+          y: {
+            stacked: true,
+            grid: { color: 'rgba(15,76,58,0.06)' },
+            ticks: { font: { size: 11 }, stepSize: 10 }
+          }
+        }
+      }
+    });
+
+    charts.mix = new Chart(mixCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['SN Routine', 'PT', 'OT', 'SOC', 'Recert'],
+        datasets: [{
+          data: [48, 18, 9, 7, 5],
+          backgroundColor: ['#0F4C3A', '#1D9E75', '#F2A65A', '#E8B0A0', '#B8D9E8'],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              boxWidth: 10,
+              boxHeight: 10,
+              padding: 10,
+              font: { size: 12, weight: 500 },
+              usePointStyle: true,
+              pointStyle: 'rectRounded'
+            }
+          },
+          tooltip: {
+            backgroundColor: '#0F4C3A',
+            padding: 10,
+            callbacks: {
+              label: (ctx) => ` ${ctx.label}: ${ctx.parsed} visits`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ---------------- FILTER CHIPS ----------------
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('filter-chip')) {
+      const parent = e.target.parentElement;
+      parent.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      e.target.classList.add('active');
+    }
+  });
+</script>
+
+</body>
+</html>
